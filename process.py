@@ -2,10 +2,10 @@ import azint
 import h5py
 import sys
 import numpy
+import os
 
 h5filename_in = sys.argv[1]
-h5filename_out = sys.argv[2]
-ponifilename = sys.argv[3]
+ponifilename = sys.argv[2]
 
 n_bins_rad = 500
 n_bins_azi = 16
@@ -19,7 +19,10 @@ direct_beam_max_y = 2389
 direct_beam_ROI = (slice(direct_beam_min_y, direct_beam_max_y),
                    slice(direct_beam_min_x, direct_beam_max_x))
 
-with h5py.File(h5filename_in, 'r') as input_file:
+base_directory = "/sls/MX/Data10/e20757/"
+output_directory = "/sls/MX/Data10/e20757/process/"
+
+with h5py.File(base_directory + h5filename_in, 'r') as input_file:
     data_container = input_file["/entry/data/data"]
     nimages = data_container.shape[0]
 
@@ -28,8 +31,8 @@ with h5py.File(h5filename_in, 'r') as input_file:
 
     image_size = (data_container.shape[1], data_container.shape[2])
 
-    if len(sys.argv) == 5:
-        with h5py.File(sys.argv[4], 'r') as file:
+    if len(sys.argv) == 4:
+        with h5py.File(sys.argv[3], 'r') as file:
             bad_pix_map = numpy.array(file['data']).astype(bool)
     else:
         bad_pix_map = numpy.zeros(image_size)
@@ -53,7 +56,11 @@ with h5py.File(h5filename_in, 'r') as input_file:
         if column_index % 1000 == 0:
             print("Image: {}".format(column_index))
 
-    with h5py.File(h5filename_out, 'w') as output_file:
+    output_directory = os.path.basename(output_directory + h5filename_in)
+    if not os.path.exists(output_directory):
+        os.makedirs(output_directory)
+
+    with h5py.File(output_directory + h5filename_in, 'w') as output_file:
         output_file.create_dataset('I_all', data=output_data)
         output_file.create_dataset('azi', data=az.azimuth_axis)
         output_file.create_dataset('q', data=az.radial_axis)
