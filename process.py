@@ -87,5 +87,5 @@ with h5py.File(base_directory + h5filename_in, 'r') as input_file:
         if (direct_beam_min_x < direct_beam_max_x) and (direct_beam_min_y < direct_beam_max_y):
             output_file.create_dataset('I_t', data=transmitted_beam)
         output_file.create_dataset('n_pix', data=az_no_corr.norm.reshape(az_no_corr.output_shape))
-        output_file.create_dataset('corr', data=az.corrections.reshape(az.output_shape))
+        output_file.create_dataset('corr', data=az.corrections.reshape(image_size))
         output_file.create_dataset('mask', data=bad_pix_map)
